@@ -1,17 +1,37 @@
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
-  try {
-    if (mongoose.connection.readyState >= 1) {
-      console.log('Using existing MongoDB connection');
-      return;
-    }
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1); 
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable');
+}
+
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    console.log('Using cached DB connection');
+    return cached.conn;
   }
-};
+
+  if (!cached.promise) {
+    console.log('Creating new DB connection...');
+    cached.promise = mongoose
+      .connect(MONGODB_URI, { bufferCommands: false })
+      .then((m) => m)
+      .catch((err) => {
+        cached.promise = null;
+        throw err;
+      });
+  }
+
+  cached.conn = await cached.promise;
+  console.log('DB connection established');
+  return cached.conn;
+}
 
 module.exports = connectDB;

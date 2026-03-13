@@ -3,15 +3,13 @@ import taskService from './taskService';
 
 export const getTasks = createAsyncThunk('tasks/getAll', async (projectId, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.user.token;
-    return await taskService.getTasks(projectId, token);
+    return await taskService.getTasks(projectId);
   } catch (error) { return thunkAPI.rejectWithValue(error.response.data.message); }
 });
 
 export const createTask = createAsyncThunk('tasks/create', async (taskData, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.user.token;
-    return await taskService.createTask(taskData, token);
+    return await taskService.createTask(taskData);
   } catch (error) { return thunkAPI.rejectWithValue(error.response.data.message); }
 });
 
@@ -19,8 +17,7 @@ export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async (taskData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.user.token;
-      return await taskService.updateTask(taskData, token);
+      return await taskService.updateTask(taskData);
     } catch (error) {
       const message = (error.response && error.response.data && error.response.data.message)
         || error.message || error.toString();
@@ -31,15 +28,13 @@ export const updateTask = createAsyncThunk(
 
 export const updateTaskStatus = createAsyncThunk('tasks/updateStatus', async ({ id, status }, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.user.token;
-    return await taskService.updateTaskStatus(id, status, token);
+    return await taskService.updateTaskStatus(id, status);
   } catch (error) { return thunkAPI.rejectWithValue(error.response.data.message); }
 });
 
 export const deleteTask = createAsyncThunk('tasks/delete', async (taskId, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.user.token;
-    await taskService.deleteTask(taskId, token);
+    await taskService.deleteTask(taskId);
     return taskId;
   } catch (error) { 
     return thunkAPI.rejectWithValue(error.response.data); 

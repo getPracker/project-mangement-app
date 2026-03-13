@@ -1,17 +1,15 @@
-// frontend/src/features/projects/projectService.js
-import axios from 'axios';
+// import axios from 'axios';
+import api from '../../api/axiosConfig';
 
 const API_URL = '/api/projects/';
 
-const createProject = async (projectData, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.post(API_URL, projectData, config);
+const createProject = async (projectData) => {
+  const response = await api.post(API_URL, projectData);
   return response.data;
 };
 
-const getProjects = async (token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.get(API_URL, config);
+const getProjects = async () => {
+  const response = await api.get(API_URL);
   return response.data;
 };
 

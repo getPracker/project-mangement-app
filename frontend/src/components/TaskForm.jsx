@@ -4,11 +4,10 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { taskSchema } from '../schemas/taskSchemas';
 import { createTask, updateTask } from '../features/tasks/taskSlice';
-import axios from 'axios';
+import api from '../api/axiosConfig';
 
 function TaskForm({ projectId, onClose, taskToEdit }) {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
 
   // Form setup
   const { register, handleSubmit, setValue, formState: { errors, isValid, isDirty } } = useForm({
@@ -24,27 +23,27 @@ function TaskForm({ projectId, onClose, taskToEdit }) {
   });
 
   // Search state
+  const [searchQuery, setSearchQuery] = useState('');
   const [userQuery, setUserQuery] = useState(taskToEdit?.assignedTo?.name || '');
   const [userResults, setUserResults] = useState([]);
   const [isFocused, setIsFocused] = useState(false); // NEW: Track focus
 
   // Debounce logic for user search
   useEffect(() => {
-    if (userQuery.length <= 1) {
+    if (searchQuery.length <= 1) {
       setUserResults([]);
       return;
     }
 
     const delayDebounce = setTimeout(async () => {
       try {
-        const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const res = await axios.get(`/api/auth/search?q=${userQuery}`, config);
+        const res = await api.get(`/api/auth/search?q=${searchQuery}`);
         setUserResults(res.data);
       } catch (err) { console.error("Search failed", err); }
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [userQuery, user.token]);
+  }, [searchQuery]);
 
   const onSubmit = async (data) => {
     try {
@@ -62,9 +61,17 @@ function TaskForm({ projectId, onClose, taskToEdit }) {
   const handleInputChange = (e) => {
     const val = e.target.value;
     setUserQuery(val);
+    setSearchQuery(val);
     if (val === '') {
-      setValue('assignedTo', null, { shouldValidate: true });
+      setValue('assignedTo', null, { shouldValidate: true, shouldDirty: true });
     }
+  };
+
+  const handleSelect = (u) => {
+    setValue('assignedTo', u._id, { shouldValidate: true, shouldDirty: true });
+    setUserQuery(u.name);
+    setUserResults([]);
+    setIsFocused(false);
   };
 
   return (
@@ -107,11 +114,9 @@ function TaskForm({ projectId, onClose, taskToEdit }) {
           {isFocused && userResults.length > 0 && (
             <ul className="absolute bg-white border w-full z-10 shadow-lg rounded-b-lg">
               {userResults.map(u => (
-                <li key={u._id} className="p-2 hover:bg-gray-100 cursor-pointer" onClick={() => {
-                  setValue('assignedTo', u._id);
-                  setUserQuery(u.name);
-                  setUserResults([]);
-                  setIsFocused(false);
+                <li key={u._id} className="p-2 hover:bg-gray-100 cursor-pointer" onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(u);
                 }}>{u.name}</li>
               ))}
             </ul>

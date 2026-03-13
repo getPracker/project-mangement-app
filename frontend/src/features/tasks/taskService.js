@@ -1,37 +1,29 @@
-import axios from 'axios';
+import api from "../../api/axiosConfig";
 
 const API_URL = '/api/tasks/';
 
-const createTask = async (taskData, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.post(API_URL, taskData, config);
+const createTask = async (taskData) => {
+  const response = await api.post(API_URL, taskData);
   return response.data;
 };
 
-const getTasks = async (projectId, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.get(`${API_URL}?projectId=${projectId}`, config);
+const getTasks = async (projectId) => {
+  const response = await api.get(`${API_URL}?projectId=${projectId}`);
   return response.data;
 };
 
-const updateTask = async (taskData, token) => {
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-  
-  const response = await axios.put(API_URL + taskData.id, taskData, config);
+const updateTask = async (taskData) => {  
+  const response = await api.put(API_URL + taskData.id, taskData);
   return response.data;
 };
 
-const updateTaskStatus = async (taskId, status, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.patch(`${API_URL}${taskId}`, { status }, config);
+const updateTaskStatus = async (taskId, status) => {
+  const response = await api.patch(`${API_URL}${taskId}`, { status });
   return response.data;
 };
 
-const deleteTask = async (taskId, token) => {
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-  const response = await axios.delete(API_URL + taskId, config);
+const deleteTask = async (taskId) => {
+  const response = await api.delete(API_URL + taskId);
   return response.data;
 };
 

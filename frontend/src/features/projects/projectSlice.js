@@ -11,16 +11,14 @@ const initialState = {
 // Async action to get projects
 export const getProjects = createAsyncThunk('projects/getAll', async (_, thunkAPI) => {
   try { 
-    const token = thunkAPI.getState().auth.user.token;
-    return await projectService.getProjects(token); 
+    return await projectService.getProjects(); 
   }
   catch (error) { return thunkAPI.rejectWithValue(error.response.data.message); }
 });
 
 export const createProject = createAsyncThunk('projects/create', async (projectData, thunkAPI) => {
   try {
-    const token = thunkAPI.getState().auth.user.token;
-    return await projectService.createProject(projectData, token);
+    return await projectService.createProject(projectData);
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data.message);
   }
